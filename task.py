@@ -1,5 +1,5 @@
 from collections import UserDict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 ################################################ Classes
 
@@ -84,27 +84,36 @@ class AddressBook(UserDict):
             del self.data[name]
         else:
             raise ValueError('Contact not found')
-    
+
     def get_upcoming_birthdays(self):
         today = datetime.now().date()
-        upcoming_birthdays = []
-        days = 7
+        days = 7  
+        closest_birthday_days = None
+        closest_birthday_name = None
+
         for record in self.data.values():
             if record.birthday:
-                birthday = record.birthday.value
+                birthday = record.birthday.value  
                 birthday_this_year = birthday.replace(year=today.year)
+
                 if birthday_this_year < today:
                     birthday_this_year = birthday_this_year.replace(year=today.year + 1)
+
+                if birthday_this_year.weekday() in [5, 6]:  
+                    days_until_monday = 7 - birthday_this_year.weekday()
+                    birthday_this_year += timedelta(days=days_until_monday)
 
                 days_until_birthday = (birthday_this_year - today).days
 
                 if 0 <= days_until_birthday <= days:
-                    upcoming_birthdays.append({
-                        "Name": record.name.value,
-                        "birthday date": birthday_this_year.strftime('%d.%m.%Y')
-                    })
-        return (f"Birthdays in the next {days} days: {upcoming_birthdays}" if len(upcoming_birthdays) > 0 else f"No one has birthday in the next {days} days.")
+                    if closest_birthday_days is None or days_until_birthday < closest_birthday_days:
+                        closest_birthday_days = days_until_birthday
+                        closest_birthday_name = record.name.value
 
+        if closest_birthday_days is not None:
+            return f"The closest birthday is {closest_birthday_name}'s, in {closest_birthday_days} days."
+        else:
+            return "No one has a birthday in the next 7 days."
     
     def __str__(self):
         return f'Your contacts:\n{'\n'.join(str(record) for record in self.data.values())}'
@@ -246,6 +255,8 @@ def main():
             case _:
                 print("Invalid command.")
     
-if __name__ == "__main__":
-    main()
-
+# if __name__ == "__main__":
+    
+#     main()
+value = datetime.strptime("12.10.1996", "%d.%m.%Y")
+print(type(value))
