@@ -30,7 +30,7 @@ class Birthday(Field):
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
         if birthday_object > datetime.today():
             raise ValueError("Birthday can't be in future")
-        super().__init__(birthday_object.date()) 
+        super().__init__(value) 
 
 class Record:
     def __init__(self, name):
@@ -87,13 +87,12 @@ class AddressBook(UserDict):
 
     def get_upcoming_birthdays(self):
         today = datetime.now().date()
-        days = 7  
-        closest_birthday_days = None
-        closest_birthday_name = None
+        days = 7
+        upcoming_birthdays = []
 
         for record in self.data.values():
             if record.birthday:
-                birthday = record.birthday.value  
+                birthday = datetime.strptime(record.birthday.value, "%d.%m.%Y").date()
                 birthday_this_year = birthday.replace(year=today.year)
 
                 if birthday_this_year < today:
@@ -106,14 +105,12 @@ class AddressBook(UserDict):
                 days_until_birthday = (birthday_this_year - today).days
 
                 if 0 <= days_until_birthday <= days:
-                    if closest_birthday_days is None or days_until_birthday < closest_birthday_days:
-                        closest_birthday_days = days_until_birthday
-                        closest_birthday_name = record.name.value
+                    upcoming_birthdays.append({
+                        'name': record.name.value,
+                        'birthday_in': days_until_birthday
+                    })
 
-        if closest_birthday_days is not None:
-            return f"The closest birthday is {closest_birthday_name}'s, in {closest_birthday_days} days."
-        else:
-            return "No one has a birthday in the next 7 days."
+        return upcoming_birthdays if upcoming_birthdays else "No birthdays in the next 7 days."
     
     def __str__(self):
         return f'Your contacts:\n{'\n'.join(str(record) for record in self.data.values())}'
@@ -255,8 +252,5 @@ def main():
             case _:
                 print("Invalid command.")
     
-# if __name__ == "__main__":
-    
-#     main()
-value = datetime.strptime("12.10.1996", "%d.%m.%Y")
-print(type(value))
+if __name__ == "__main__":
+    main()
