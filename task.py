@@ -95,22 +95,23 @@ class AddressBook(UserDict):
                 birthday = datetime.strptime(record.birthday.value, "%d.%m.%Y").date()
                 birthday_this_year = birthday.replace(year=today.year)
 
-                if birthday_this_year < today:
-                    birthday_this_year = birthday_this_year.replace(year=today.year + 1)
+            if birthday_this_year < today:
+                birthday_this_year = birthday_this_year.replace(year=today.year + 1)
 
-                if birthday_this_year.weekday() in [5, 6]:  
-                    days_until_monday = 7 - birthday_this_year.weekday()
-                    birthday_this_year += timedelta(days=days_until_monday)
+            if birthday_this_year.weekday() in [5, 6]:  
+                days_until_monday = 7 - birthday_this_year.weekday()
+                birthday_this_year += timedelta(days=days_until_monday)
 
-                days_until_birthday = (birthday_this_year - today).days
+            days_until_birthday = (birthday_this_year - today).days
 
-                if 0 <= days_until_birthday <= days:
-                    upcoming_birthdays.append({
-                        'name': record.name.value,
-                        'birthday_in': days_until_birthday
-                    })
+            if 0 <= days_until_birthday <= days:
+                upcoming_birthdays.append({
+                    'name': record.name.value,
+                    'congratulate': birthday_this_year.strftime("%d.%m.%Y") 
+                })
 
         return upcoming_birthdays if upcoming_birthdays else "No birthdays in the next 7 days."
+
     
     def __str__(self):
         return f'Your contacts:\n{'\n'.join(str(record) for record in self.data.values())}'
